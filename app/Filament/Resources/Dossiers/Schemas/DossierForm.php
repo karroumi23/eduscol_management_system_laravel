@@ -2,12 +2,15 @@
 
 namespace App\Filament\Resources\Dossiers\Schemas;
 
+use App\Models\Formateur;
+use App\Models\Formation;
 use App\Models\Participant;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class DossierForm
@@ -26,7 +29,7 @@ class DossierForm
                             ->searchable()
                             ->required()
                             ->live()
-                            ->afterStateUpdated(function ($state, callable $set) {
+                            ->afterStateUpdated(function ($state, Set $set) {
                                 if (! $state) {
                                     return;
                                 }
@@ -80,9 +83,37 @@ class DossierForm
                     ->columns(2),
 
                 Section::make('Détails de la formation')
-                    ->description('Type, formateur, tarification et planning de la formation.')
+                    ->description('Sélectionnez une formation existante ou renseignez manuellement.')
                     ->icon('heroicon-o-academic-cap')
                     ->schema([
+                        Select::make('formation_id')
+                            ->label('Formation')
+                            ->options(
+                                Formation::query()
+                                    ->with('formateur')
+                                    ->get()
+                                    ->mapWithKeys(fn (Formation $f) => [
+                                        $f->id => "{$f->titre} — {$f->type_formation} ({$f->date_depart?->format('d/m/Y')})",
+                                    ])
+                            )
+                            ->searchable()
+                            ->native(false)
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if (! $state) {
+                                    return;
+                                }
+                                $formation = Formation::with('formateur')->find($state);
+                                if ($formation) {
+                                    $set('type_formation', $formation->type_formation);
+                                    $set('categorie_formation', $formation->categorie_formation);
+                                    $set('id_formateur', $formation->id_formateur);
+                                    $set('prix_formation', $formation->prix);
+                                    $set('date_depart_formation', $formation->date_depart?->toDateString());
+                                    $set('date_fin_formation', $formation->date_fin?->toDateString());
+                                }
+                            })
+                            ->columnSpanFull(),
                         Select::make('type_formation')
                             ->label('Type de formation')
                             ->options([
@@ -91,10 +122,16 @@ class DossierForm
                             ])
                             ->required()
                             ->native(false),
-                        TextInput::make('nom_formateur')
+                        Select::make('id_formateur')
                             ->label('Formateur')
+                            ->options(
+                                Formateur::query()
+                                    ->get()
+                                    ->mapWithKeys(fn (Formateur $f) => [$f->id => $f->nom_complet])
+                            )
+                            ->searchable()
                             ->required()
-                            ->maxLength(255),
+                            ->native(false),
                         TextInput::make('prix_formation')
                             ->label('Prix (MAD)')
                             ->required()

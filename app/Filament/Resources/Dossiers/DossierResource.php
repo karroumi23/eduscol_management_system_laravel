@@ -14,6 +14,8 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DossierResource extends Resource
 {
@@ -54,5 +56,12 @@ class DossierResource extends Resource
             'view' => ViewDossier::route('/{record}'),
             'edit' => EditDossier::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withoutGlobalScopes([SoftDeletingScope::class])
+            ->with(['participant', 'formateur', 'paiements', 'createdBy']);
     }
 }

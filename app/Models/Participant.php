@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Participant extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'photo',
@@ -19,6 +20,8 @@ class Participant extends Model
         'cree_par',
     ];
 
+    // ── Relationships ──────────────────────────────────────────────
+
     public function dossiers()
     {
         return $this->hasMany(Dossier::class, 'participant_id');
@@ -27,5 +30,15 @@ class Participant extends Model
     public function createdBy()
     {
         return $this->belongsTo(User::class, 'cree_par');
+    }
+
+    // ── Scopes ─────────────────────────────────────────────────────
+
+    public function scopeDuMois($query)
+    {
+        return $query->whereBetween('created_at', [
+            now()->startOfMonth(),
+            now()->endOfMonth(),
+        ]);
     }
 }
