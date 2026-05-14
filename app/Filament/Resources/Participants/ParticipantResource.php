@@ -1,13 +1,10 @@
 <?php
 
-
-namespace App\Filament\Resources;
 namespace App\Filament\Resources\Participants;
 
 use App\Filament\Resources\Participants\Pages;
-use App\Filament\Resources\Participants\Pages\CreateParticipant;
-use App\Filament\Resources\Participants\Pages\EditParticipant;
-use App\Filament\Resources\Participants\Pages\ListParticipants;
+use Filament\Actions\Action;
+use App\Filament\Resources\Dossiers\DossierResource;
 use App\Models\Participant;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Hidden;
@@ -18,13 +15,12 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Auth;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-
+use Illuminate\Support\Facades\Auth;
 
 class ParticipantResource extends Resource
 {
@@ -104,6 +100,7 @@ class ParticipantResource extends Resource
                     ->color(fn (string $state): string => match ($state) {
                         'TRM' => 'primary',
                         'TRV' => 'success',
+                        default => 'gray',
                     }),
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->label('Créé par')
@@ -111,6 +108,12 @@ class ParticipantResource extends Resource
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Date d\'ajout')
                     ->date('d/m/Y')
+                    ->sortable(),
+                Tables\Columns\TextColumn::make('dossiers_count')
+                    ->label('Dossiers')
+                    ->counts('dossiers')
+                    ->badge()
+                    ->color(fn (int $state): string => $state > 0 ? 'success' : 'gray')
                     ->sortable(),
             ])
             ->filters([
@@ -122,11 +125,27 @@ class ParticipantResource extends Resource
                     ]),
             ])
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-                DeleteAction::make(),
+                Action::make('create_dossier')
+                    ->label('')
+                    ->tooltip('Nouveau dossier')
+                    ->icon('heroicon-o-plus-circle')
+                    ->color('warning')
+                    ->url(fn (Participant $record): string =>
+                        DossierResource::getUrl('create') . '?participant_id=' . $record->id
+                    ),
+                Action::make('view_dossiers')
+                    ->label('')
+                    ->tooltip('Voir dossiers')
+                    ->icon('heroicon-o-folder-open')
+                    ->color('success')
+                    ->visible(fn (Participant $record): bool => $record->dossiers_count > 0)
+                    ->url(fn (Participant $record): string =>
+                        DossierResource::getUrl('index') . '?participant=' . $record->id
+                    ),
+                ViewAction::make()->label(''),
+                EditAction::make()->label(''),
+                DeleteAction::make()->label(''),
             ])
-
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
@@ -142,9 +161,14 @@ class ParticipantResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListParticipants::route('/'),
+            'index'  => Pages\ListParticipants::route('/'),
             'create' => Pages\CreateParticipant::route('/create'),
-            'edit' => Pages\EditParticipant::route('/{record}/edit'),
+            'edit'   => Pages\EditParticipant::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->withCount('dossiers');
     }
 }

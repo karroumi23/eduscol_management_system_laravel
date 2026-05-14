@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources\Dossiers;
 
-use App\Filament\Resources\Dossiers\Pages\CreateDossier;
-use App\Filament\Resources\Dossiers\Pages\EditDossier;
-use App\Filament\Resources\Dossiers\Pages\ListDossiers;
+
+use App\Filament\Resources\Dossiers\Pages;
+
 use App\Models\Dossier;
 use App\Models\Participant;
 use Filament\Actions\DeleteAction;
@@ -208,9 +208,9 @@ class DossierResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => ListDossiers::route('/'),
-            'create' => CreateDossier::route('/create'),
-            'edit' => EditDossier::route('/{record}/edit'),
+            'index' => Pages\ListDossiers::route('/'),
+            'create' => Pages\CreateDossier::route('/create'),
+            'edit' => Pages\EditDossier::route('/{record}/edit'),
         ];
     }
 }
