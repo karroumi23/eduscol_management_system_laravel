@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('participant_id')->constrained('participants')->onDelete('cascade');
             $table->string('photo')->nullable();
-            $table->string('nom');
-            $table->string('cin');
-            $table->string('telephone');
-            $table->date('date_naissance');
-            $table->string('permis');
-            $table->enum('categorie_formation', ['TRM', 'TRV']);
+            $table->string('nom')->nullable();
+            $table->string('cin')->nullable();
+            $table->string('telephone')->nullable();
+            $table->date('date_naissance')->nullable();
+            $table->string('permis')->nullable();
+            $table->enum('categorie_formation', ['TRM', 'TRV'])->nullable();
             $table->enum('type_formation', ['FQIMO', 'FCO']);
             $table->string('nom_formateur');
             $table->decimal('prix_formation', 10, 2);
