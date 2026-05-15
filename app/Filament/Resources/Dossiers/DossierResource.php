@@ -51,6 +51,7 @@ class DossierResource extends Resource
                                 $set('telephone', $participant->telephone);
                                 $set('permis', $participant->num_permis);
                                 $set('categorie_formation', $participant->categorie_formation);
+                                $set('photo', $participant->photo);
                             }
                         }),
                     FileUpload::make('photo')
@@ -214,3 +215,4 @@ class DossierResource extends Resource
         ];
     }
 }
+

@@ -3,17 +3,24 @@
 namespace App\Filament\Resources\Dossiers\Pages;
 
 use App\Filament\Resources\Dossiers\DossierResource;
-use Filament\Actions\CreateAction;
+use App\Models\Dossier;
 use Filament\Resources\Pages\ListRecords;
 
 class ListDossiers extends ListRecords
 {
     protected static string $resource = DossierResource::class;
 
-    protected function getHeaderActions(): array
+    public function getViewData(): array
     {
         return [
-            CreateAction::make(),
+            'records' => Dossier::with(['participant', 'createdBy'])
+                ->latest()
+                ->paginate(9),
         ];
+    }
+
+    public function getView(): string
+    {
+        return 'filament.resources.dossiers.list-dossiers';
     }
 }
