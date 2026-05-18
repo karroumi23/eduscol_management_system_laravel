@@ -96,6 +96,7 @@ class ParticipantResource extends Resource
                     ->searchable(),
                 Tables\Columns\TextColumn::make('categorie_formation')
                     ->label('Catégorie')
+                    ->searchable()
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'TRM' => 'primary',
