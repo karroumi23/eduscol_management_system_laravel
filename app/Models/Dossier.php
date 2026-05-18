@@ -11,12 +11,7 @@ class Dossier extends Model
 
     protected $fillable = [
         'participant_id',
-        'photo',
-        'nom',
-        'cin',
-        'telephone',
         'date_naissance',
-        'permis',
         'categorie_formation',
         'type_formation',
         'nom_formateur',
