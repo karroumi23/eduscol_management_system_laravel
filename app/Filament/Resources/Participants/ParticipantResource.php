@@ -141,7 +141,7 @@ class ParticipantResource extends Resource
                     ->color('success')
                     ->visible(fn (Participant $record): bool => $record->dossiers_count > 0)
                     ->url(fn (Participant $record): string =>
-                        DossierResource::getUrl('index') . '?participant=' . $record->id
+                        \App\Filament\Resources\Dossiers\DossierResource::getUrl('index') . '?participant_id=' . $record->id
                     ),
                 ViewAction::make()->label(''),
                 EditAction::make()->label(''),

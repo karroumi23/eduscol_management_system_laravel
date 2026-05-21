@@ -1,5 +1,33 @@
 <x-filament-panels::page>
 
+      {{-- Participant filter header --}}
+      @if(isset($participant) && $participant)
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; background:#ecfdf5; padding:16px; border-radius:12px; border:1px solid #a7f3d0;">
+            <div style="display:flex; align-items:center; gap:12px;">
+                @if($participant->photo)
+                    <img src="{{ Storage::url($participant->photo) }}"
+                        style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid #059669;" />
+                @else
+                    <div style="width:50px; height:50px; border-radius:50%; background:#059669; display:flex; align-items:center; justify-content:center;">
+                        <span style="color:white; font-weight:bold; font-size:1.3rem;">
+                            {{ substr($participant->nom, 0, 1) }}
+                        </span>
+                    </div>
+                @endif
+                <div>
+                    <p style="font-size:18px; font-weight:700; color:#065f46; margin:0;">
+                        Dossiers de {{ $participant->nom }}
+                    </p>
+                   
+                </div>
+            </div>
+            <a href="{{ \App\Filament\Resources\Dossiers\DossierResource::getUrl('index') }}"
+                style="background:#6b7280; color:white; padding:8px 16px; border-radius:8px; text-decoration:none; font-size:13px; font-weight:600;">
+                ← Tous les dossiers
+            </a>
+        </div>
+      @endif
+
     {{-- Header button --}}
     <div style="display:flex; justify-content:flex-end; margin-bottom:1.5rem;">
         <a href="{{ \App\Filament\Resources\Dossiers\DossierResource::getUrl('create') }}"
@@ -8,46 +36,46 @@
         </a>
     </div>
 
-    @if($records->isEmpty())
+     @if($records->isEmpty())
         <div style="text-align:center; padding:4rem; color:#9ca3af;">
             <p style="font-size:1.5rem;">Aucun dossier trouvé</p>
         </div>
-    @else
+     @else
         <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem;">
             @foreach($records as $dossier)
                 <div style="background:white; border-radius:16px; box-shadow:0 4px 15px rgba(0,0,0,0.08); overflow:hidden; border:1px solid #e5e7eb;">
 
-                    {{-- Header --}}
-<div style="background:#059669; padding:16px; display:flex; align-items:center; justify-content:space-between;">
-    <div style="display:flex; align-items:center; gap:12px;">
-        @if($dossier->participant?->photo)
-            <img src="{{ Storage::url($dossier->participant->photo) }}"
-                style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid white;" />
-        @else
-            <div style="width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center;">
-                <span style="color:white; font-weight:bold; font-size:1.2rem;">
-                    {{ substr($dossier->participant?->nom ?? 'N', 0, 1) }}
-                </span>
+            {{-- Header --}}
+            <div style="background:#059669; padding:16px; display:flex; align-items:center; justify-content:space-between;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    @if($dossier->participant?->photo)
+                        <img src="{{ Storage::url($dossier->participant->photo) }}"
+                            style="width:44px; height:44px; border-radius:50%; object-fit:cover; border:2px solid white;" />
+                    @else
+                        <div style="width:44px; height:44px; border-radius:50%; background:rgba(255,255,255,0.2); display:flex; align-items:center; justify-content:center;">
+                            <span style="color:white; font-weight:bold; font-size:1.2rem;">
+                                {{ substr($dossier->participant?->nom ?? 'N', 0, 1) }}
+                            </span>
+                        </div>
+                    @endif
+                    <div>
+                        <p style="color:white; font-weight:800; font-size:16px; margin:0; text-transform:uppercase; letter-spacing:0.5px;">
+                            {{ $dossier->participant?->nom ?? $dossier->nom }}
+                        </p>
+                        <p style="color:#a7f3d0; font-size:12px; margin:4px 0 0;"># Dossier {{ $dossier->id }}</p>
+                    </div>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+                    <span style="padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
+                        background:{{ $dossier->categorie_formation === 'TRM' ? '#3b82f6' : '#8b5cf6' }}; color:white;">
+                        {{ $dossier->categorie_formation }}
+                    </span>
+                    <span style="padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
+                        background:{{ $dossier->type_formation === 'FCO' ? '#ef4444' : '#f59e0b' }}; color:white;">
+                        {{ $dossier->type_formation }}
+                    </span>
+                </div>
             </div>
-        @endif
-        <div>
-            <p style="color:white; font-weight:800; font-size:16px; margin:0; text-transform:uppercase; letter-spacing:0.5px;">
-                {{ $dossier->participant?->nom ?? $dossier->nom }}
-            </p>
-            <p style="color:#a7f3d0; font-size:12px; margin:4px 0 0;"># Dossier {{ $dossier->id }}</p>
-        </div>
-    </div>
-    <div style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
-        <span style="padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
-            background:{{ $dossier->categorie_formation === 'TRM' ? '#3b82f6' : '#8b5cf6' }}; color:white;">
-            {{ $dossier->categorie_formation }}
-        </span>
-        <span style="padding:3px 10px; border-radius:20px; font-size:11px; font-weight:700;
-            background:{{ $dossier->type_formation === 'FCO' ? '#ef4444' : '#f59e0b' }}; color:white;">
-            {{ $dossier->type_formation }}
-        </span>
-    </div>
-</div>
 
                     {{-- Body --}}
                     <div style="padding:16px; display:flex; flex-direction:column; gap:10px;">
@@ -147,21 +175,23 @@
 
 </x-filament-panels::page>
 
+
+
 <script>
-function deleteDossier(id) {
-    if (!confirm('Voulez-vous vraiment supprimer ce dossier ?')) return;
-    fetch(`/admin/dossiers/dossiers/${id}`, {
-        method: 'DELETE',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json',
-        }
-    }).then(response => {
-        if (response.ok) {
-            window.location.reload();
-        } else {
-            alert('Erreur lors de la suppression.');
-        }
-    });
-}
+    function deleteDossier(id) {
+        if (!confirm('Voulez-vous vraiment supprimer ce dossier ?')) return;
+        fetch(`/admin/dossiers/dossiers/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json',
+            }
+        }).then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Erreur lors de la suppression.');
+            }
+        });
+    }
 </script>
