@@ -1,6 +1,6 @@
 <x-filament-panels::page>
 
-      {{-- Participant filter header --}}
+    {{-- Participant filter header --}}
       @if(isset($participant) && $participant)
         <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem; background:#ecfdf5; padding:16px; border-radius:12px; border:1px solid #a7f3d0;">
             <div style="display:flex; align-items:center; gap:12px;">
@@ -14,11 +14,11 @@
                         </span>
                     </div>
                 @endif
-                <div>
-                    <p style="font-size:18px; font-weight:700; color:#065f46; margin:0;">
-                        Dossiers de {{ $participant->nom }}
+                <div style="display:flex; align-items:center">
+                    <p style="font-size:17px; font-weight:700; color:#788a85; margin:0;">
+                        Dossiers de :  <p style="font-size:25px; font-weight:700; color:#065f46; margin:0;"> {{ $participant->nom }}</p>
                     </p>
-                   
+
                 </div>
             </div>
             <a href="{{ \App\Filament\Resources\Dossiers\DossierResource::getUrl('index') }}"
@@ -28,7 +28,74 @@
         </div>
       @endif
 
-    {{-- Header button --}}
+    {{-- Filters --}}
+    <div style="background:#f9fafb; padding:20px; border-radius:12px; border:1px solid #e5e7eb; margin-bottom:1.5rem;">
+
+        {{-- Filter header --}}
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+            <p style="font-size:13px; font-weight:700; color:#374151; margin:0;">🔍 Recherche & Filtres</p>
+            <a href="{{ \App\Filament\Resources\Dossiers\DossierResource::getUrl('index') }}"
+                style="background:#db0e0e; color:white; padding:4px 8px; border-radius:8px; text-decoration:none; font-size:12px; font-weight:600;">
+                ✖ Reset
+            </a>
+        </div>
+
+        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:12px;">
+
+            @if(request()->query('participant_id'))
+                <input type="hidden" id="participant_id_val" value="{{ request()->query('participant_id') }}">
+            @endif
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:12px; font-weight:600; color:#374151;">Nom</label>
+                <input
+                    type="text"
+                    id="search_nom"
+                    value="{{ request()->query('search_nom') }}"
+                    placeholder="Rechercher par nom..."
+                    oninput="autoFilter()"
+                    style="padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; color:#111827; background:white; outline:none; width:100%; box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:12px; font-weight:600; color:#374151;">CIN</label>
+                <input
+                    type="text"
+                    id="search_cin"
+                    value="{{ request()->query('search_cin') }}"
+                    placeholder="Rechercher par CIN..."
+                    oninput="autoFilter()"
+                    style="padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; color:#111827; background:white; outline:none; width:100%; box-sizing:border-box;">
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:12px; font-weight:600; color:#374151;">Catégorie</label>
+                <select
+                    id="categorie_formation"
+                    onchange="autoFilter()"
+                    style="padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; color:#111827; background:white; outline:none; width:100%; box-sizing:border-box;">
+                    <option value="">Toutes</option>
+                    <option value="TRM" {{ request()->query('categorie_formation') === 'TRM' ? 'selected' : '' }}>TRM</option>
+                    <option value="TRV" {{ request()->query('categorie_formation') === 'TRV' ? 'selected' : '' }}>TRV</option>
+                </select>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:4px;">
+                <label style="font-size:12px; font-weight:600; color:#374151;">Type de formation</label>
+                <select
+                    id="type_formation"
+                    onchange="autoFilter()"
+                    style="padding:9px 12px; border:1px solid #d1d5db; border-radius:8px; font-size:13px; color:#111827; background:white; outline:none; width:100%; box-sizing:border-box;">
+                    <option value="">Tous</option>
+                    <option value="FQIMO" {{ request()->query('type_formation') === 'FQIMO' ? 'selected' : '' }}>FQIMO</option>
+                    <option value="FCO" {{ request()->query('type_formation') === 'FCO' ? 'selected' : '' }}>FCO</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    {{-- Header button   + Nouveau Dossier --}}
     <div style="display:flex; justify-content:flex-end; margin-bottom:1.5rem;">
         <a href="{{ \App\Filament\Resources\Dossiers\DossierResource::getUrl('create') }}"
             style="display:inline-flex; align-items:center; gap:8px; background:#059669; color:white; padding:10px 20px; border-radius:10px; font-weight:600; text-decoration:none; font-size:14px; box-shadow:0 2px 6px rgba(0,0,0,0.15);">
@@ -195,3 +262,27 @@
         });
     }
 </script>
+{{-- filter recherche --}}
+<script>
+    let filterTimer = null;
+
+    function autoFilter() {
+        clearTimeout(filterTimer);
+        filterTimer = setTimeout(function() {
+            const nom = document.getElementById('search_nom').value;
+            const cin = document.getElementById('search_cin').value;
+            const categorie = document.getElementById('categorie_formation').value;
+            const type = document.getElementById('type_formation').value;
+            const participantId = document.getElementById('participant_id_val')?.value ?? '';
+
+            const params = new URLSearchParams();
+            if (nom) params.set('search_nom', nom);
+            if (cin) params.set('search_cin', cin);
+            if (categorie) params.set('categorie_formation', categorie);
+            if (type) params.set('type_formation', type);
+            if (participantId) params.set('participant_id', participantId);
+
+            window.location.href = '{{ \App\Filament\Resources\Dossiers\DossierResource::getUrl('index') }}?' + params.toString();
+        }, 600);
+    }
+    </script>
