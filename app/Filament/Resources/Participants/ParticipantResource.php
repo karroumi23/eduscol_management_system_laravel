@@ -28,6 +28,8 @@ class ParticipantResource extends Resource
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-users';
     protected static ?string $navigationLabel = 'Participants';
     protected static ?string $modelLabel = 'Participant';
+    protected static ?string $pluralModelLabel = 'Participants';
+    protected static ?string $createButtonLabel = 'Nouveau Participant';
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema
@@ -75,6 +77,7 @@ class ParticipantResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->searchPlaceholder('Rechercher...')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
@@ -173,3 +176,4 @@ class ParticipantResource extends Resource
         return parent::getEloquentQuery()->withCount('dossiers');
     }
 }
+

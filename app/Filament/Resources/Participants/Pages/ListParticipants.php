@@ -13,7 +13,19 @@ class ListParticipants extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Nouveau Participant'),
         ];
     }
+
+    public function getTitle(): string
+    {
+        return 'Liste des Participants';
+    }
+
+    public function getBreadcrumb(): string
+    {
+        return 'Liste';
+    }
 }
+
