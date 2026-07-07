@@ -1,0 +1,18 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament';
+@source '../../../../resources/views/filament';
+
+@theme {
+    --color-primary-50: #eef5fa;
+    --color-primary-100: #d7e7f2;
+    --color-primary-200: #b3d1e6;
+    --color-primary-300: #85b3d5;
+    --color-primary-400: #5893c1;
+    --color-primary-500: #2f6fa5;
+    --color-primary-600: #275e8c;
+    --color-primary-700: #204c71;
+    --color-primary-800: #1a3d5b;
+    --color-primary-900: #16324b;
+    --color-primary-950: #0d1e2e;
+}

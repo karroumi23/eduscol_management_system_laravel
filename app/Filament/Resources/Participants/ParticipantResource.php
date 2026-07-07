@@ -13,6 +13,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\FontWeight;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Actions\DeleteAction;
@@ -77,48 +78,70 @@ class ParticipantResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->searchPlaceholder('Rechercher...')
+            ->searchPlaceholder('Rechercher un participant...')
+            ->striped()
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->label('ID')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 Tables\Columns\ImageColumn::make('photo')
-                    ->label('Photo')
-                    ->circular(),
+                    ->label('')
+                    ->circular()
+                    ->defaultImageUrl(fn (Participant $record): string => 'https://ui-avatars.com/api/?name='.urlencode($record->nom).'&background=2F6FA5&color=fff')
+                    ->extraImgAttributes(['class' => 'ring-2 ring-[#2F6FA5]/20']),
+
                 Tables\Columns\TextColumn::make('nom')
-                    ->label('Nom')
-                    ->searchable()
+                    ->label('Participant')
+                    ->weight(FontWeight::SemiBold)
+                    ->description(fn (Participant $record): string => 'CIN : '.$record->cin)
+                    ->searchable(['nom', 'cin'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('cin')
-                    ->label('CIN')
-                    ->searchable(),
+
                 Tables\Columns\TextColumn::make('telephone')
-                    ->label('Téléphone'),
+                    ->label('Téléphone')
+                    // ->icon('heroicon-o-phone')
+                    ->iconColor('primary')
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('num_permis')
                     ->label('N° Permis')
-                    ->searchable(),
+                    ->icon('heroicon-o-identification')
+                    ->iconColor('primary')
+                    ->searchable()
+                    ->toggleable(),
+
                 Tables\Columns\TextColumn::make('categorie_formation')
                     ->label('Catégorie')
-                    ->searchable()
                     ->badge()
+                    ->searchable()
                     ->color(fn (string $state): string => match ($state) {
                         'TRM' => 'primary',
-                        'TRV' => 'success',
+                        'TRV' => 'warning',
                         default => 'gray',
                     }),
-                Tables\Columns\TextColumn::make('createdBy.name')
-                    ->label('Créé par')
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('created_at')
-                    ->label('Date d\'ajout')
-                    ->date('d/m/Y')
-                    ->sortable(),
+
                 Tables\Columns\TextColumn::make('dossiers_count')
                     ->label('Dossiers')
                     ->counts('dossiers')
                     ->badge()
-                    ->color(fn (int $state): string => $state > 0 ? 'success' : 'gray')
+                    ->color(fn (int $state): string => $state > 0 ? 'primary' : 'gray')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('createdBy.name')
+                    ->label('Créé par')
+                    ->icon('heroicon-o-user-circle')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                Tables\Columns\TextColumn::make('created_at')
+                    ->label('Ajouté')
+                    ->since()
+                    ->dateTimeTooltip()
+                    ->sortable()
+                    ->toggleable(),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('categorie_formation')
@@ -141,7 +164,7 @@ class ParticipantResource extends Resource
                     ->label('')
                     ->tooltip('Voir dossiers')
                     ->icon('heroicon-o-folder-open')
-                    ->color('success')
+                    ->color('primary')
                     ->visible(fn (Participant $record): bool => $record->dossiers_count > 0)
                     ->url(fn (Participant $record): string =>
                         \App\Filament\Resources\Dossiers\DossierResource::getUrl('index') . '?participant_id=' . $record->id
@@ -154,6 +177,16 @@ class ParticipantResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->emptyStateIcon('heroicon-o-users')
+            ->emptyStateHeading('Aucun participant pour le moment')
+            ->emptyStateDescription('Ajoutez votre premier participant pour commencer à créer des dossiers de formation.')
+            ->emptyStateActions([
+                Action::make('create')
+                    ->label('Nouveau Participant')
+                    ->icon('heroicon-o-plus')
+                    ->color('primary')
+                    ->url(fn (): string => static::getUrl('create')),
             ]);
     }
 
@@ -176,4 +209,3 @@ class ParticipantResource extends Resource
         return parent::getEloquentQuery()->withCount('dossiers');
     }
 }
-
