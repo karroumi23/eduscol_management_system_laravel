@@ -1,5 +1,6 @@
 <!-- 
-  1- demarage server laragon
+  0- npm run dev 
+  1-demarage server laragon
   2- php artisan serve
   3- https..../admin (filament dashboard)
   4- 'name' => 'karroumi',
